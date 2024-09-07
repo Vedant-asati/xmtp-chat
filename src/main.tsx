@@ -9,6 +9,7 @@ import { createHashRouter, RouterProvider } from "react-router-dom";
 import { findConversation } from "./model/conversations";
 import ConversationViewWithLoader from "./views/ConversationViewWithLoader.tsx";
 import NewConversationView from "./views/NewConversationView.tsx";
+import GroupView from "./views/GroupView.tsx";
 import WalletContext from "./contexts/WalletContext.tsx";
 
 async function conversationLoader({ params }: any) {
@@ -29,6 +30,10 @@ const router = createHashRouter([
   {
     path: "new",
     element: <NewConversationView />,
+  },
+  {
+    path: "group",
+    element: <GroupView />,
   },
 ]);
 

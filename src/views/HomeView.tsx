@@ -1,14 +1,28 @@
 import { ReactElement, useState } from "react";
 import ConversationListView from "./ConversationListView";
+// import GroupsListView from "./GroupsListView";
 import { useClient, useSetClient } from "../hooks/useClient";
 import { shortAddress } from "../util/shortAddress";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { useDisconnect } from "wagmi";
+import socketClient from "socket.io-client";
 
 export default function HomeView(): ReactElement {
+
+  // const SERVER = "http://localhost:8080";
+  // const socket = socketClient(SERVER);
+  // socket.on('connection', () => {
+  //   console.log(`I'm connected with the back-end`);
+  // });
+  // socket.on('msgfound', (data) => {
+  //   console.log(`I've got new chats`,data);
+  // });
+  // socket.onAny(()=>console.log("jai siyaram"))
+
   const client = useClient()!;
   const [copied, setCopied] = useState(false);
+  const [activeChat, setActiveChat] = useState("single");
 
   function copy() {
     navigator.clipboard.writeText(client.address);
@@ -43,12 +57,13 @@ export default function HomeView(): ReactElement {
         </div>
       </Header>
       <small className="flex justify-between">
-        <span>Here are your conversations:</span>
-        <Link to="new" className="text-blue-700">
-          Make a new one
-        </Link>
+        <span><button onClick={() => setActiveChat("single")}>Chats</button></span>
+        <span><button onClick={() => setActiveChat("group")}>Groups</button></span>
       </small>
-      <ConversationListView />
+      {
+        activeChat === "group" ? "<GroupsListView/>" : <ConversationListView />
+      }
+
     </div>
   );
 }

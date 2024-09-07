@@ -41,6 +41,9 @@ export default function ConversationListView(): ReactElement {
             </Link>
           ))
         : "Could not load conversations"}
+      <Link to="new" className="text-blue-700">
+        Add a new one
+      </Link>
     </div>
   );
 }
