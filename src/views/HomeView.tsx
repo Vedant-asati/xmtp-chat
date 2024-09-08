@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import ConversationListView from "./ConversationListView";
-// import GroupsListView from "./GroupsListView";
+import GroupsListView from "./GroupsListView";
 import { useClient, useSetClient } from "../hooks/useClient";
 import { shortAddress } from "../util/shortAddress";
 import { Link } from "react-router-dom";
@@ -9,20 +9,9 @@ import { useDisconnect } from "wagmi";
 import socketClient from "socket.io-client";
 
 export default function HomeView(): ReactElement {
-
-  // const SERVER = "http://localhost:8080";
-  // const socket = socketClient(SERVER);
-  // socket.on('connection', () => {
-  //   console.log(`I'm connected with the back-end`);
-  // });
-  // socket.on('msgfound', (data) => {
-  //   console.log(`I've got new chats`,data);
-  // });
-  // socket.onAny(()=>console.log("jai siyaram"))
-
   const client = useClient()!;
   const [copied, setCopied] = useState(false);
-  const [activeChat, setActiveChat] = useState("single");
+  const [activeChat, setActiveChat] = useState("group");
 
   function copy() {
     navigator.clipboard.writeText(client.address);
@@ -61,7 +50,7 @@ export default function HomeView(): ReactElement {
         <span><button onClick={() => setActiveChat("group")}>Groups</button></span>
       </small>
       {
-        activeChat === "group" ? "<GroupsListView/>" : <ConversationListView />
+        activeChat === "group" ? <GroupsListView/> : <ConversationListView />
       }
 
     </div>

@@ -11,10 +11,12 @@ import {
 } from "wagmi";
 import { Toaster, toast } from 'react-hot-toast';
 import { toBytes } from 'viem';
+import { registerWithClient } from '../services/groupService';
 
 const socket = io('http://localhost:3000'); // Replace with your backend URL
 
 const GroupView = () => {
+    const [receivedMessage, setReceivedMessage] = useState([]);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [groupId, setGroupId] = useState('');
@@ -23,23 +25,30 @@ const GroupView = () => {
     const { address } = useAccount();
     const { signMessageAsync } = useSignMessage();
 
-    useEffect(() => {
-        // Listen for new messages
-        socket.on('newMessage', (data) => {
-            setMessages((prevMessages) => [...prevMessages, data]);
-        });
+    // useEffect(() => {
+    //     // Listen for new messages
+    //     socket.on('newMessage', (data) => {
+    //         setMessages((prevMessages) => [...prevMessages, data]);
+    //     });
 
-        // Listen for new groups
-        socket.on('newGroup', (data) => {
-            console.log('New group created:', data);
-        });
+    //     // Listen for new groups
+    //     socket.on('newGroup', (data) => {
+    //         console.log('New group created:', data);
+    //     });
+    //     //wss
+    //     socket.on('message', (msg) => {
+    //         // toast.success("New msg: ", msg);
+    //         setReceivedMessage(msg);
+    //         console.log("new msg: ", msg)
+    //     });
 
-        // Clean up socket events on unmount
-        return () => {
-            socket.off('newMessage');
-            socket.off('newGroup');
-        };
-    }, []);
+    //     // Clean up socket events on unmount
+    //     return () => {
+    //         socket.off('newMessage');
+    //         socket.off('newGroup');
+    //     };
+    // }, []);
+
 
     const sendMessage = async () => {
         if (newMessage && groupId) {
@@ -56,36 +65,6 @@ const GroupView = () => {
                 members: participants,
             });
         }
-    };
-    const registerWithClient = async () => {
-        if (address) {
-            const res = await axios.post('http://localhost:3000/setupClient', {
-                address,
-            });
-            console.log(res);
-            if (res.status == 200) {
-                try {
-                    const signatureText = res.data.signatureText;
-                    if (!signatureText) {
-                        console.log("Client already Registered");
-                        return;
-                    }
-                    const signature = await signMessageAsync({ message: signatureText }) || "";
-                    // const signatureBytes = toBytes(signature);
-                    const res2 = await axios.post('http://localhost:3000/registerClient', {
-                        address: address,
-                        signature: signature,
-                        signatureText: signatureText,
-                    });
-                    console.log(res2);
-                    toast.error("This didn't work.");
-                } catch (error) {
-                    toast.error("Error with signing message. Please try again.");
-                }
-            }
-        }
-        else toast.error("Wallet not connected.")
-
     };
 
     return (
@@ -123,21 +102,23 @@ const GroupView = () => {
                     <button onClick={createGroup}>Create Group</button>
                 </div>
                 <div><button onClick={() => toast.promise(
-                    registerWithClient(),
+                    registerWithClient(address, signMessageAsync),
                     {
                         loading: 'Please Wait... Regsistering Client',
                         success: <b>Successfully registered!</b>,
-                        error: <b>Error registering Client.</b>,
+                        error: (err) => <b>Error registering Client: {err.message}{console.log(err)}</b>,
                     }
                 )}>Register a Client</button></div>
 
-            {/* Chat Messages */}
-            {/* <div style={{ border: '1px solid black', height: '300px', overflowY: 'scroll', marginTop: '20px' }}>
+                {/* Chat Messages */}
+                {/* <div style={{ border: '1px solid black', height: '300px', overflowY: 'scroll', marginTop: '20px' }}>
                 {messages.map((msg, index) => (
                     <p key={index}>{`Group ${msg.groupId}: ${msg.messageContent}`}</p>
                 ))}
             </div> */}
-        </div >
+                <button onClick={() => socket.emit('hello', 'world')}>send to server</button>
+                <div>Received from server: {receivedMessage}</div>
+            </div >
         </>
     );
 };
