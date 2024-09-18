@@ -18,6 +18,7 @@ import { Conversation } from "@xmtp/mls-client";
 
 import { registerWithClient, fetchGroupConversations, fetchGroupMessages } from "../services/groupService";
 import { useLatestMessages } from "../hooks/useLatestMessages";
+import { shortAddress } from "../util/shortAddress";
 // import { useLatestGroupMessages } from "../hooks/useLatestGroupMessages";
 
 const socket = io('http://localhost:3000'); // Replace with your backend URL
@@ -29,16 +30,22 @@ export default function GroupsListView(): ReactElement {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const [toggled, setToggled] = useState(true);
+  const [latestMessage, setLatestMessage] = useState()
 
   useEffect(() => {
     const fetchGroups = async () => {
       console.log("calling conv", address)
-      const conversations = await fetchGroupConversations("0xafC55278246Ba557F639fA3A297EAeDe772Cf49C");
+      const conversations = await fetchGroupConversations(address);
       console.log("done")
       setGroups(conversations);
+      // setLatestMessages(conversations.???)
     };
     fetchGroups();
   }, [toggled]);
+
+  useEffect(() => { //
+    console.log(groups); //
+  }, [groups]); //
 
   useEffect(() => {
     if (newGroup) {
@@ -47,7 +54,10 @@ export default function GroupsListView(): ReactElement {
   }, [newGroup]);
 
   useEffect(() => {
-    if (newGroupMessage) {
+    if (!newGroupMessage) return;
+    console.log("newGroupMessage", newGroupMessage);
+
+    if (newGroupMessage.sender != address)
       toast.custom((t) => (
         <div
           className={`${t.visible ? 'animate-enter' : 'animate-leave'
@@ -64,10 +74,10 @@ export default function GroupsListView(): ReactElement {
               </div>
               <div className="ml-3 flex-1">
                 <p className="text-sm font-medium text-gray-900">
-                  Emilia Gates
+                  {newGroupMessage.groupName}
                 </p>
                 <p className="mt-1 text-sm text-gray-500">
-                  Sure! 8:30pm works great!
+                  {shortAddress(newGroupMessage.sender)}: {newGroupMessage.messageContent}
                 </p>
               </div>
             </div>
@@ -82,7 +92,12 @@ export default function GroupsListView(): ReactElement {
           </div>
         </div>
       ))
-    }
+
+    setTimeout(() => {
+      setToggled(toggled);
+    }, 10000);
+    setToggled(!toggled);
+
   }, [newGroupMessage]);
 
   return (
@@ -99,11 +114,9 @@ export default function GroupsListView(): ReactElement {
           }
         )}>Register a Client</button></div>
         {groups?.length === 0 && <p>No group conversations yet.</p>}
-        {groups?.map((group) => (
+        {Array.from(groups)?.map((group) => (
           <Link to={`group/${group.id}`} key={group.id}>
-            <GroupConversationCellView key={group.id} conversation={group}
-            // latestMessage={latestMessage}
-            />
+            <GroupConversationCellView key={group.id} conversation={group} />
           </Link>
         ))}
       </div>

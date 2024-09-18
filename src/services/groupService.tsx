@@ -24,33 +24,23 @@ export async function createGroup(address: `0x${string}` | undefined, groupData:
     }
 }
 
-export async function fetchGroupConversations(address: string) {
-    try {
-        // let data = JSON.stringify({
-        //     "address": "0xafC55278246Ba557F639fA3A297EAeDe772Cf49C"
-        //   });
-        const response = await axios.post("http://localhost:3000/conversations", {
-            // headers: {
-            //     "Content-Type": "application/json",
-            // },
-            data: { address: "0xafC55278246Ba557F639fA3A297EAeDe772Cf49C" },
-        });
-        console.log(response);
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        // console.log(`Error fetching group conversations: ${error.message}`);
-    }
-}
 
-export async function fetchGroupMessages(address: `0x${string}` | undefined, groupId: string) {
+export async function fetchGroupMessages(address: string, groupId: string) {
     try {
-        const response = await axios.get(`http://localhost:3000/groupMessages?groupId=${groupId}`, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-            data: { address },
+        const data = JSON.stringify({
+            "address": "0xafC55278246Ba557F639fA3A297EAeDe772Cf49C"
         });
+
+        const config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `http://localhost:3000/${groupId}/messages`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+        const response = await axios.request(config);
 
         return response.data;
     } catch (error) {
@@ -58,13 +48,12 @@ export async function fetchGroupMessages(address: `0x${string}` | undefined, gro
     }
 }
 
-export async function sendGroupMessage(address: `0x${string}` | undefined, groupId: string, content: string, contentType: string = "text") {
+export async function sendGroupMessage(address: string, groupId: string, messageContent: string) {
     try {
         const response = await axios.post("http://localhost:3000/sendMessage", {
             address,
             groupId,
-            content,
-            contentType,
+            messageContent,
         }, {
             headers: {
                 "Content-Type": "application/json",
@@ -129,3 +118,17 @@ export async function registerWithClient(address: `0x${string}` | undefined, sig
     }
     else toast.error("Wallet not connected.");
 };
+
+export async function fetchGroupConversations(address: string) {
+    if (!address) return;
+    try {
+        const response = await axios.post("http://localhost:3000/conversations", {
+            address: address,
+        });
+        console.log(response);
+        return response.data.conversations;
+    } catch (error) {
+        console.log(`Error fetching group conversations:`, error);
+        toast.error("Error fetching chats. Please try refreshing.");
+    }
+} // clean
