@@ -1,13 +1,21 @@
 import { useState } from "react";
+import { FiSend, FiImage } from "react-icons/fi"; // Icons for buttons
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
-export default function GroupMessageComposerView({ onSendMessage, onSendMedia }: { onSendMessage: (message: string) => Promise<void>, onSendMedia: (file: File) => Promise<void> }) {
+export default function GroupMessageComposerView({
+  onSendMessage,
+  onSendMedia,
+}: {
+  onSendMessage: (message: string) => Promise<void>;
+  onSendMedia: (file: File) => Promise<void>;
+}) {
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const handleSendMessage = async () => {
-    if (message.trim() === "") return;
+    if (!message.trim()) return;
     await onSendMessage(message);
-    setMessage(""); // Clear input after sending
+    setMessage("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,30 +27,30 @@ export default function GroupMessageComposerView({ onSendMessage, onSendMedia }:
   const handleSendMedia = async () => {
     if (!file) return;
     await onSendMedia(file);
-    setFile(null); // Clear file input after sending
+    setFile(null);
   };
 
   return (
-    <div>
-      <div className="flex">
-        <input
-          type="text"
-          className="flex-grow p-2 border rounded"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message"
-        />
-        <button className="bg-blue-500 text-white p-2 rounded ml-2" onClick={handleSendMessage}>
-          Send
-        </button>
-      </div>
-
-      <div className="mt-2">
-        <input type="file" onChange={handleFileChange} />
-        <button className="bg-green-500 text-white p-2 rounded ml-2" onClick={handleSendMedia}>
-          Send Media
-        </button>
-      </div>
+    <div className="p-4 border-t bg-white flex items-center">
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type a message"
+        className="flex-grow border rounded-full p-2 mr-2"
+        style={{ color: "grey" }}
+      />
+      <label htmlFor="file-upload" className="cursor-pointer p-2">
+        {/* <FiImage size={24} /> */}
+        <AttachFileIcon sx={{ color: "grey" }} />
+        <input id="file-upload" type="file" onChange={handleFileChange} className="hidden" />
+      </label>
+      <button
+        className="bg-blue-500 text-white p-2 rounded-full ml-2"
+        onClick={handleSendMessage}
+      >
+        <FiSend size={24} />
+      </button>
     </div>
   );
 }

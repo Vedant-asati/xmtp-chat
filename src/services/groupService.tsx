@@ -132,3 +132,15 @@ export async function fetchGroupConversations(address: string) {
         toast.error("Error fetching chats. Please try refreshing.");
     }
 } // clean
+
+export async function fetchInboxId(address: string) {
+    if (!address) return;
+    try {
+        const response = await axios.get(`http://localhost:3000/inboxId?address=${address}`);
+        console.log(response);
+        return response.data.inboxId;
+    } catch (error) {
+        console.log(`Error fetching inboxId:`, error);
+        toast.error("Error fetching inboxId. Please try refreshing.");
+    }
+} // clean
